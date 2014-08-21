@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dereksalama.kwotabl" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".Login"
+            android:label="@string/app_name"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="gitkit"
+                    android:scheme="com.googleusercontent.apps.790703926050-1dt61hkpb131q1i6tdv1lftsihe616t3" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".QuoteBook"
+            android:label="@string/title_activity_quote_book" >
+        </activity>
+        <activity
+            android:name=".NewQuote"
+            android:label="NewQuote">
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="identitytoolkit.show_providers"
+            android:value="Google" />
+        <meta-data
+            android:name="identitytoolkit.use_google_plus"
+            android:value="false" />
+        <!-- Un-comment the following 3 meta-data tags and replace placeholder with the real value -->
+        <meta-data
+            android:name="identitytoolkit.api_key"
+            android:value="AIzaSyAM0yklZey_1mzntJ7O_3aFv6F2u5zClho" />
+        <meta-data
+            android:name="identitytoolkit.server_client_id"
+            android:value="790703926050-1dt61hkpb131q1i6tdv1lftsihe616t3.apps.googleusercontent.com" />
+        <meta-data
+            android:name="identitytoolkit.server_widget_url"
+            android:value="https://localhost/oauth2callback" />
+
+        <activity
+            android:name=".NewQuote"
+            android:label="@string/title_activity_new_quote"
+            android:parentActivityName=".QuoteBook" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.dereksalama.kwotabl.QuoteBook" />
+        </activity>
+    </application>
+
+</manifest>
