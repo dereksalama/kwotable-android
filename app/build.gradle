@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs '..'
+    }
+}
+
 android {
     compileSdkVersion 19
     buildToolsVersion '20.0.0'
@@ -11,17 +19,10 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    buildTypes {
-        release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile "com.android.support:support-v4:20.0+"
     compile 'com.google.android.gms:play-services:5.0.89'
-    compile project(':identitytoolkit')
+    compile(name:'identitytoolkit', ext:'aar')
 }

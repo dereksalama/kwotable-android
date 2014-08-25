@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Kwotabl.iml" filepath="$PROJECT_DIR$/Kwotabl.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/identitytoolkit/identitytoolkit.iml" filepath="$PROJECT_DIR$/identitytoolkit/identitytoolkit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kwotable-android.iml" filepath="$PROJECT_DIR$/kwotable-android.iml" />
     </modules>
   </component>
 </project>
