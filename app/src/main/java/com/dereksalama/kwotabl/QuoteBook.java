@@ -17,20 +17,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.identitytoolkit.client.GitkitClient;
 import com.google.identitytoolkit.model.Account;
 import com.google.identitytoolkit.model.IdToken;
 import com.google.identitytoolkit.util.HttpUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -128,22 +127,16 @@ public class QuoteBook extends FragmentActivity {
                     if (responseStr != null) {
 
                         Gson gson = new Gson();
+                        Type collectionType = new TypeToken<List<QuoteResponseData>>(){}.getType();
+                        List<QuoteResponseData> quotes = gson.fromJson(responseStr, collectionType);
 
-                        //TODO
-                        JSONArray jArray = new JSONArray(responseStr);
-                        for (int i = 0; i < jArray.length(); i++) {
-                            JSONObject jObj = jArray.getJSONObject(i);
-
-                            String quote = jObj.getString("quote") + " - " +
-                                    jObj.getString("author");
-
-                            listAdapter.add(quote);
+                        for (QuoteResponseData quote : quotes) {
+                            listAdapter.add(quote.toString());
                         }
+
                     }
                     return conn.getResponseCode();
                 } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
                     e.printStackTrace();
                 } finally {
                     if (conn != null) {
