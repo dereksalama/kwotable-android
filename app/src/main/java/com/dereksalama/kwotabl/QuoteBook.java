@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.google.identitytoolkit.client.GitkitClient;
 import com.google.identitytoolkit.model.Account;
 import com.google.identitytoolkit.model.IdToken;
@@ -125,6 +126,10 @@ public class QuoteBook extends FragmentActivity {
 
                     String responseStr = reader.readLine();
                     if (responseStr != null) {
+
+                        Gson gson = new Gson();
+
+                        //TODO
                         JSONArray jArray = new JSONArray(responseStr);
                         for (int i = 0; i < jArray.length(); i++) {
                             JSONObject jObj = jArray.getJSONObject(i);
