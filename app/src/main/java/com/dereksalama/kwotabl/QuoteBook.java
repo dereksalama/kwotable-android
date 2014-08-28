@@ -26,9 +26,11 @@ import com.google.identitytoolkit.util.HttpUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +38,7 @@ import java.util.concurrent.TimeoutException;
 
 public class QuoteBook extends FragmentActivity {
 
-    public static final String BASE_URL = "https://localhost:8888";
+    public static final String BASE_URL = "http://10.0.2.2:8080";
     private static final String DOWNLOAD_URL = BASE_URL + "/download?";
 
 
@@ -96,10 +98,22 @@ public class QuoteBook extends FragmentActivity {
 
         final StringBuilder reqUrl = new StringBuilder();
         reqUrl.append(DOWNLOAD_URL);
-        reqUrl.append("id_token=");
-        reqUrl.append(client.getSavedIdToken());
 
-        AsyncTask<Void, Void, Integer> uploadTask = new AsyncTask<Void, Void, Integer>() {
+        final String charset = "UTF-8";
+        String query;
+        try {
+            query = String.format("id_token=%s", URLEncoder.encode(client.getSavedIdToken().getLocalId(), charset));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Error loading quotes :(",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        reqUrl.append(query);
+
+
+        AsyncTask<Void, Void, List<QuoteResponseData>> uploadTask = new AsyncTask<Void, Void, List<QuoteResponseData>>() {
 
             private ProgressDialog dialog;
 
@@ -110,14 +124,15 @@ public class QuoteBook extends FragmentActivity {
             }
 
             @Override
-            protected Integer doInBackground(Void... param) {
+            protected List<QuoteResponseData> doInBackground(Void... param) {
                 HttpURLConnection conn = null;
                 try {
                     conn = (HttpURLConnection) new URL(reqUrl.toString()).openConnection();
                     conn.setDoInput(true);
+                    conn.setRequestProperty("Accept-Charset", charset);
 
                     if (conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED) {
-                        return conn.getResponseCode();
+                        return null;
                     }
 
                     BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -128,14 +143,8 @@ public class QuoteBook extends FragmentActivity {
 
                         Gson gson = new Gson();
                         Type collectionType = new TypeToken<List<QuoteResponseData>>(){}.getType();
-                        List<QuoteResponseData> quotes = gson.fromJson(responseStr, collectionType);
-
-                        for (QuoteResponseData quote : quotes) {
-                            listAdapter.add(quote.toString());
-                        }
-
+                        return gson.fromJson(responseStr, collectionType);
                     }
-                    return conn.getResponseCode();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -144,18 +153,27 @@ public class QuoteBook extends FragmentActivity {
                     }
                 }
 
-                return HttpURLConnection.HTTP_BAD_REQUEST;
+                return null;
             }
 
             @Override
-            protected void onPostExecute(Integer result) {
+            protected void onPostExecute(List<QuoteResponseData> quotes) {
                 if (dialog.isShowing()) {
                     dialog.dismiss();
                 }
-                if (result == HttpURLConnection.HTTP_ACCEPTED) {
+                if (quotes != null) {
+                    listAdapter.clear();
+                    for (QuoteResponseData quote : quotes) {
+                        listAdapter.add(quote.toString());
+                    }
                     listAdapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(getApplicationContext(), "Error loading quotes :(",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                if (listAdapter.getCount() == 0) {
+                    Toast.makeText(getApplicationContext(), "No quotes yet :(",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -163,6 +181,7 @@ public class QuoteBook extends FragmentActivity {
         };
 
         try {
+            uploadTask.execute(null,null,null);
             uploadTask.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();

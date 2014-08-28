@@ -103,7 +103,7 @@ public class NewQuote extends FragmentActivity {
                 try {
                     jObj.put("quote", quoteText);
                     jObj.put("author", quoteAuthor);
-                    jObj.put("id_token", client.getSavedIdToken());
+                    jObj.put("id_token", client.getSavedIdToken().getLocalId());
 
                     byte[] body = jObj.toString().getBytes();
 
@@ -147,6 +147,7 @@ public class NewQuote extends FragmentActivity {
         };
 
         try {
+            uploadTask.execute(null,null,null);
             uploadTask.get(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
