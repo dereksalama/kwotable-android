@@ -41,8 +41,6 @@ public class QuoteBook extends FragmentActivity {
     public static final String BASE_URL = "http://10.0.2.2:8080";
     private static final String DOWNLOAD_URL = BASE_URL + "/download?";
 
-
-    private GitkitClient client;
     private static final String TAG = "QuoteBook";
 
     private ArrayAdapter<String> listAdapter;
@@ -52,13 +50,6 @@ public class QuoteBook extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.quote_book);
 
-        client = GitkitClient.newBuilder(this, new GitkitClient.SignInCallbacks() {
-            @Override
-            public void onSignIn(IdToken idToken, Account account) {}
-
-            @Override
-            public void onSignInFailed() {}
-        }).build();
 
         listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         ListView listView = (ListView) findViewById(R.id.quote_list);
@@ -69,8 +60,8 @@ public class QuoteBook extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        IdToken idToken = client.getSavedIdToken();
-        Account account = client.getSavedAccount();
+        IdToken idToken = GitkitClient.getSavedIdToken(this);
+        Account account = GitkitClient.getSavedAccount(this);
         if (idToken != null && account != null) {
             Log.d(TAG, "already signed in");
         } else {
@@ -102,7 +93,7 @@ public class QuoteBook extends FragmentActivity {
         final String charset = "UTF-8";
         String query;
         try {
-            query = String.format("id_token=%s", URLEncoder.encode(client.getSavedIdToken().getLocalId(), charset));
+            query = String.format("id_token=%s", URLEncoder.encode(GitkitClient.getSavedIdToken(this).getLocalId(), charset));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "Error loading quotes :(",

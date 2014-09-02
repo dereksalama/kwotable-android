@@ -32,21 +32,10 @@ public class NewQuote extends FragmentActivity {
 
     private static final String TAG = "NewQuote";
 
-
-    private GitkitClient client;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_quote);
-
-        client = GitkitClient.newBuilder(this, new GitkitClient.SignInCallbacks() {
-            @Override
-            public void onSignIn(IdToken idToken, Account account) {}
-
-            @Override
-            public void onSignInFailed() {}
-        }).build();
 
         Button saveButton = (Button) findViewById(R.id.button_save_quote);
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -70,8 +59,8 @@ public class NewQuote extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        IdToken idToken = client.getSavedIdToken();
-        Account account = client.getSavedAccount();
+        IdToken idToken = GitkitClient.getSavedIdToken(this);
+        Account account = GitkitClient.getSavedAccount(this);
         if (idToken != null && account != null) {
             Log.d(TAG, "already signed in");
         } else {
@@ -103,7 +92,7 @@ public class NewQuote extends FragmentActivity {
                 try {
                     jObj.put("quote", quoteText);
                     jObj.put("author", quoteAuthor);
-                    jObj.put("id_token", client.getSavedIdToken().getLocalId());
+                    jObj.put("id_token", GitkitClient.getSavedIdToken(NewQuote.this).getLocalId());
 
                     byte[] body = jObj.toString().getBytes();
 
