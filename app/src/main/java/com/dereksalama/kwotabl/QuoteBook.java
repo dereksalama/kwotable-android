@@ -31,6 +31,7 @@ import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,7 @@ import java.util.concurrent.TimeoutException;
 
 public class QuoteBook extends FragmentActivity {
 
-    public static final String BASE_URL = "http://10.0.2.2:8080";
+    public static final String BASE_URL = "http://10.0.2.2:8888";
     private static final String DOWNLOAD_URL = BASE_URL + "/download?";
 
     private static final String TAG = "QuoteBook";
@@ -103,6 +104,8 @@ public class QuoteBook extends FragmentActivity {
 
         reqUrl.append(query);
 
+        reqUrl.append("&timestamp=");
+        reqUrl.append(System.currentTimeMillis());
 
         AsyncTask<Void, Void, List<QuoteResponseData>> uploadTask = new AsyncTask<Void, Void, List<QuoteResponseData>>() {
 
@@ -118,9 +121,20 @@ public class QuoteBook extends FragmentActivity {
             protected List<QuoteResponseData> doInBackground(Void... param) {
                 HttpURLConnection conn = null;
                 try {
+                    String checksum;
+                    try {
+                        checksum = ChecksumUtil.makeCheck(reqUrl.toString().getBytes());
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+
                     conn = (HttpURLConnection) new URL(reqUrl.toString()).openConnection();
+                    conn.setRequestProperty("X-CHECKSUM", checksum);
                     conn.setDoInput(true);
                     conn.setRequestProperty("Accept-Charset", charset);
+
+
 
                     if (conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED) {
                         return null;

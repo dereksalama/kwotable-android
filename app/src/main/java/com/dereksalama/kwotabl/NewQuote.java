@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -96,7 +97,21 @@ public class NewQuote extends FragmentActivity {
 
                     byte[] body = jObj.toString().getBytes();
 
-                    conn = (HttpURLConnection) new URL(UPLOAD_URL).openConnection();
+                    StringBuilder reqUrl = new StringBuilder();
+                    reqUrl.append(UPLOAD_URL)
+                            .append("?timestamp=")
+                            .append(System.currentTimeMillis());
+
+                    String checksum;
+                    try {
+                        checksum = ChecksumUtil.makeCheck(reqUrl.toString().getBytes());
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+
+                    conn = (HttpURLConnection) new URL(reqUrl.toString()).openConnection();
+                    conn.setRequestProperty("X-CHECKSUM", checksum);
                     conn.setDoInput(true);
 
                     conn.setDoOutput(true);

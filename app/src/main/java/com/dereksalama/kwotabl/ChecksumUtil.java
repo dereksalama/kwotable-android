@@ -17,6 +17,6 @@ public class ChecksumUtil {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(bytes);
         BigInteger bn = new BigInteger(1,md.digest(SECRET.getBytes()));
-        return bn.toString(16);
+        return bn.toString();
     }
 }
