@@ -23,16 +23,21 @@ import com.google.identitytoolkit.model.Account;
 import com.google.identitytoolkit.model.IdToken;
 import com.google.identitytoolkit.util.HttpUtils;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -88,24 +93,8 @@ public class QuoteBook extends FragmentActivity {
 
     private void loadQuotes() {
 
-        final StringBuilder reqUrl = new StringBuilder();
-        reqUrl.append(DOWNLOAD_URL);
-
-        final String charset = "UTF-8";
-        String query;
-        try {
-            query = String.format("id_token=%s", URLEncoder.encode(GitkitClient.getSavedIdToken(this).getLocalId(), charset));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(), "Error loading quotes :(",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        reqUrl.append(query);
-
-        reqUrl.append("&timestamp=");
-        reqUrl.append(System.currentTimeMillis());
+        //reqUrl.append("&timestamp=");
+        //reqUrl.append(System.currentTimeMillis());
 
         AsyncTask<Void, Void, List<QuoteResponseData>> uploadTask = new AsyncTask<Void, Void, List<QuoteResponseData>>() {
 
@@ -121,6 +110,7 @@ public class QuoteBook extends FragmentActivity {
             protected List<QuoteResponseData> doInBackground(Void... param) {
                 HttpURLConnection conn = null;
                 try {
+                    /*
                     String checksum;
                     try {
                         checksum = ChecksumUtil.makeCheck(reqUrl.toString().getBytes());
@@ -128,12 +118,23 @@ public class QuoteBook extends FragmentActivity {
                         e.printStackTrace();
                         return null;
                     }
+                    */
 
-                    conn = (HttpURLConnection) new URL(reqUrl.toString()).openConnection();
-                    conn.setRequestProperty("X-CHECKSUM", checksum);
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    //params.put("local_id", GitkitClient.getSavedIdToken(QuoteBook.this).getLocalId());
+                    params.put("id_token", GitkitClient.getSavedIdToken(QuoteBook.this).getTokenString());
+                    byte[] body = new JSONObject(params).toString().getBytes();
+
+                    conn = (HttpURLConnection) new URL(DOWNLOAD_URL).openConnection();
+                   // conn.setRequestProperty("X-CHECKSUM", checksum);
                     conn.setDoInput(true);
-                    conn.setRequestProperty("Accept-Charset", charset);
-
+                    conn.setDoOutput(true);
+                    conn.setFixedLengthStreamingMode(body.length);
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setRequestMethod("POST");
+                    OutputStream os = conn.getOutputStream();
+                    os.write(body);
+                    os.close();
 
 
                     if (conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED) {

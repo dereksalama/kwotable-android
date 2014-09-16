@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -88,15 +90,16 @@ public class NewQuote extends FragmentActivity {
 
             @Override
             protected Integer doInBackground(Void... param) {
-                JSONObject jObj = new JSONObject();
+                Map<String, Object> params = new HashMap<String, Object>();
                 HttpURLConnection conn = null;
                 try {
-                    jObj.put("quote", quoteText);
-                    jObj.put("author", quoteAuthor);
-                    jObj.put("id_token", GitkitClient.getSavedIdToken(NewQuote.this).getLocalId());
+                    //params.put("local_id", GitkitClient.getSavedIdToken(NewQuote.this).getLocalId());
+                    params.put("quote", quoteText);
+                    params.put("author", quoteAuthor);
+                    params.put("id_token", GitkitClient.getSavedIdToken(NewQuote.this).getTokenString());
+                    byte[] body = new JSONObject(params).toString().getBytes();
 
-                    byte[] body = jObj.toString().getBytes();
-
+                    /*
                     StringBuilder reqUrl = new StringBuilder();
                     reqUrl.append(UPLOAD_URL)
                             .append("?timestamp=")
@@ -109,9 +112,10 @@ public class NewQuote extends FragmentActivity {
                         e.printStackTrace();
                         return null;
                     }
+                    */
 
-                    conn = (HttpURLConnection) new URL(reqUrl.toString()).openConnection();
-                    conn.setRequestProperty("X-CHECKSUM", checksum);
+                    conn = (HttpURLConnection) new URL(UPLOAD_URL).openConnection();
+                    //conn.setRequestProperty("X-CHECKSUM", checksum);
                     conn.setDoInput(true);
 
                     conn.setDoOutput(true);
@@ -123,8 +127,6 @@ public class NewQuote extends FragmentActivity {
                     os.close();
 
                     return conn.getResponseCode();
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
